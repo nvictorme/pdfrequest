@@ -4,7 +4,7 @@ import PDFKit from "pdfkit";
 export const renderInvoice = (data: Invoice, doc: PDFKit.PDFDocument): void => {
     doc.fontSize(10);
     // number of total pages needed based on item count
-    const itemsPerPage = 10;
+    const itemsPerPage = 20;
     const totalPages = Math.ceil(data.items.length / itemsPerPage);
 
     for (let i = 1; i <= totalPages; i++) {
@@ -13,9 +13,11 @@ export const renderInvoice = (data: Invoice, doc: PDFKit.PDFDocument): void => {
         renderPersonHeader(data.sender, doc, false);
         renderPersonHeader(data.customer, doc, true);
         // render items table
-        let lastY = renderItemsTable(data.items.slice(i - 1, Math.ceil(itemsPerPage/i)), doc);
+        const firstItemIndex = itemsPerPage * (i - 1);
+        let lastItemIndex = itemsPerPage * i > data.items.length ? data.items.length : itemsPerPage * i;
+        let lastY = renderItemsTable(data.items.slice(firstItemIndex, lastItemIndex), doc);
 
-        if (i == totalPages) {
+        if (i === totalPages) {
             let subTotal = calculateSubTotal(data.items);
             lastY = renderSummary(subTotal, data.summary, lastY, doc);
             lastY = renderNotes(data.notes, lastY, doc);
