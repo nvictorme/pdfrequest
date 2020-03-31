@@ -12,7 +12,7 @@ router.get("/", (req: Request, res: Response) => {
 });
 
 router.post("/", ((req: Request, res: Response) => {
-    const payload: Invoice = req.body.payload;
+    const payload: Invoice = req.body;
     createPDF(DocumentType.invoice, payload, res);
 }));
 

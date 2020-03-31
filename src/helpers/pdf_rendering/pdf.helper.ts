@@ -3,24 +3,29 @@ import {Response} from "express";
 import {DocumentType} from "../../models/enumerations";
 import {renderInvoice} from "./invoice.render";
 
-const switchByDocumentType = (documentType: DocumentType, data: any, doc: PDFKit.PDFDocument): PDFKit.PDFDocument => {
+const renderByDocumentType = (documentType: DocumentType, data: any, doc: PDFKit.PDFDocument): void => {
     switch (documentType) {
         case DocumentType.invoice: {
-            return renderInvoice(data, doc);
+            renderInvoice(data, doc);
+            break;
         }
         default: {
-            return renderInvoice(data, doc)
+            renderInvoice(data, doc);
         }
     }
 };
 
 export const createPDF = (documentType: DocumentType, data: any, res: Response) => {
-    let doc = new PDFKit();
+    let doc = new PDFKit({
+        layout: "portrait",
+        size: "LETTER"
+    });
     let buffers: Buffer[] = [];
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', () => {
         const pdfData: any = Buffer.concat(buffers);
         res.status(200).contentType("application/pdf").send(pdfData);
     });
-    switchByDocumentType(documentType, data, doc).save().end();
+    renderByDocumentType(documentType, data, doc);
+    doc.save().end();
 };
